@@ -1,0 +1,654 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>LumioClip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: #ffffff;
+      min-height: 100vh;
+      -webkit-text-size-adjust: 100%;
+      touch-action: manipulation;
+    }
+
+    /* Blue gradient navbar */
+    .navbar {
+      background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 40%, #0369a1 100%);
+      box-shadow: 0 4px 25px rgba(2, 132, 199, 0.35);
+    }
+
+    .navbar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -50%;
+      width: 200%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      animation: shine 6s infinite;
+    }
+
+    @keyframes shine {
+      0% { transform: translateX(-30%); }
+      100% { transform: translateX(30%); }
+    }
+
+    /* Logo text */
+    .logo-text {
+      background: linear-gradient(180deg, #ffffff 0%, #e0f2fe 50%, #bae6fd 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 2px 12px rgba(255, 255, 255, 0.25);
+    }
+
+    .logo-text span {
+      background: linear-gradient(180deg, #fef08a 0%, #fde047 50%, #facc15 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 18px rgba(250, 204, 21, 0.45);
+    }
+
+    .logo-text::after {
+      content: '';
+      position: absolute;
+      bottom: -4px;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #ffffff, transparent);
+      border-radius: 2px;
+      opacity: 0.65;
+    }
+
+    /* Hamburger */
+    .hamburger {
+      width: 28px;
+      height: 20px;
+      position: relative;
+      cursor: pointer;
+      z-index: 50;
+    }
+
+    .hamburger span {
+      display: block;
+      position: absolute;
+      height: 3px;
+      width: 100%;
+      background: white;
+      border-radius: 9999px;
+      opacity: 1;
+      left: 0;
+      transform: rotate(0deg);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .hamburger span:nth-child(1) { top: 0; }
+    .hamburger span:nth-child(2) { top: 8.5px; width: 70%; }
+    .hamburger span:nth-child(3) { top: 17px; }
+
+    .hamburger.open span:nth-child(1) {
+      top: 8.5px;
+      transform: rotate(135deg);
+    }
+    .hamburger.open span:nth-child(2) {
+      opacity: 0;
+      width: 0;
+      left: 50%;
+    }
+    .hamburger.open span:nth-child(3) {
+      top: 8.5px;
+      transform: rotate(-135deg);
+    }
+
+    .mobile-menu {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .mobile-menu.open {
+      max-height: 320px;
+    }
+
+    /* Input focus glow */
+    .url-input:focus {
+      box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.15);
+    }
+
+    /* ===== DOWNLOAD BUTTON ===== */
+    .cssbuttons-io-button {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: inherit;
+      cursor: pointer;
+      font-weight: 500;
+      font-size: 15px;
+      padding: 0.65em 1.4em;
+      color: white;
+      background: linear-gradient(
+        0deg,
+        rgba(77, 54, 208, 1) 0%,
+        rgba(132, 116, 254, 1) 100%
+      );
+      border: none;
+      box-shadow: 0 0.7em 1.5em -0.5em #4d36d0be;
+      letter-spacing: 0.03em;
+      border-radius: 20em;
+      white-space: nowrap;
+      height: 48px;
+      width: fit-content;
+      min-width: 140px;
+      margin: 0 auto;
+      transition: opacity 0.2s;
+    }
+
+    .cssbuttons-io-button svg {
+      margin-right: 7px;
+      width: 20px;
+      height: 20px;
+    }
+
+    .cssbuttons-io-button:hover {
+      box-shadow: 0 0.5em 1.5em -0.5em #4d36d0be;
+    }
+
+    .cssbuttons-io-button:active {
+      box-shadow: 0 0.3em 1em -0.5em #4d36d0be;
+    }
+
+    .cssbuttons-io-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* ===== LOADER (from Uiverse.io) ===== */
+    .loader-wrapper {
+      display: none;
+      justify-content: center;
+      align-items: center;
+      margin-top: 2.5rem;
+      height: 180px;
+      position: relative;
+    }
+
+    .loader-wrapper.show {
+      display: flex;
+    }
+
+    .loader {
+      --c: #f7971d;
+      position: relative;
+      width: 12em;
+      height: 12em;
+    }
+
+    .ph1 {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+      animation: ph1 3s ease infinite;
+      clip-path: polygon(-4em -1em, 4em -1em, 4em 1em, -4em 1em);
+    }
+
+    .record {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 2em;
+      height: 2em;
+      background: var(--c);
+      border-radius: 999px;
+      animation: blink 1s step-end infinite;
+      transform: translate(-3.5em, -50%);
+    }
+
+    .record-text {
+      position: absolute;
+      color: var(--c);
+      font-size: 2.2em;
+      font-weight: 700;
+      left: 50%;
+      top: 50%;
+      transform: translate(-0.5em, -50%);
+      width: 2em;
+      height: 1.5em;
+    }
+
+    @keyframes blink {
+      50% { opacity: 0; }
+      75% { opacity: 1; }
+    }
+
+    @keyframes ph1 {
+      25.5% {
+        translate: 0 0;
+        clip-path: polygon(-4em -1em, 4em -1em, 4em 1em, -4em 1em);
+      }
+      30%,
+      to {
+        opacity: 1;
+        translate: 0 3em;
+        clip-path: polygon(-4em 1em, 4em 1em, 4em 1em, -4em 1em);
+      }
+      30.1% {
+        opacity: 0;
+        translate: 0 3em;
+      }
+      92.4%,
+      to {
+        translate: 0 0;
+        opacity: 0;
+        clip-path: polygon(-4em -1em, 4em -1em, 4em 1em, -4em 1em);
+      }
+      92.5% {
+        opacity: 1;
+        clip-path: polygon(-4em -1em, -0.5em -1em, -0.5em 1em, -4em 1em);
+      }
+      to {
+        opacity: 1;
+        clip-path: polygon(-4em -1em, 4em -1em, 4em 1em, -4em 1em);
+      }
+    }
+
+    .ph2 {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -4em);
+      width: 11em;
+      height: 7em;
+      perspective: 150px;
+      perspective-origin: 50% 0%;
+      transform-style: preserve-3d;
+      animation: ph2 3s ease-in-out infinite;
+    }
+
+    @keyframes ph2 {
+      0%, 15% { translate: 0 4em; }
+      0%, 29% { opacity: 0; }
+      30% { opacity: 1; }
+      40% { translate: 0 0; }
+      50% {
+        translate: 0 0.5em;
+        opacity: 1;
+      }
+      50.1%,
+      to { opacity: 0; }
+    }
+
+    .laptop-b {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 0.5em;
+      background: var(--c);
+      border-bottom-left-radius: 2em;
+      border-bottom-right-radius: 2em;
+      animation: ph2b 3s ease infinite;
+    }
+
+    .laptop-t {
+      margin: 0 1.25em;
+      color: var(--c);
+      transform-origin: 50% 100%;
+      animation: ph2t 3s ease infinite;
+    }
+
+    @keyframes ph2t {
+      0%, 29% { transform: rotateX(-10deg); }
+      0%, 41.9% { stroke-dasharray: unset; }
+      42% {
+        transform: rotateX(4deg);
+        stroke-dasharray: 0 0 100;
+      }
+      50% {
+        transform: rotateX(-20deg);
+        stroke-dasharray: 0 50 0 100;
+      }
+    }
+
+    @keyframes ph2b {
+      42% { scale: 1 1; }
+      50% { scale: 0 1; }
+    }
+
+    .icon {
+      position: absolute;
+      width: 4em;
+      height: 4em;
+      background: var(--c);
+      border-radius: 999px;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      transform-origin: center;
+      animation: icon 3s ease-in-out infinite;
+      isolation: isolate;
+      border-color: var(--c);
+      border-style: solid;
+      z-index: -1;
+    }
+
+    @keyframes icon {
+      0%, 15% {
+        translate: 0 4.5em;
+        width: 0;
+        height: 0;
+      }
+      0%, 29% { opacity: 0; }
+      30% { opacity: 1; }
+      40% {
+        translate: 0 -0.75em;
+        width: 4em;
+        height: 4em;
+      }
+      50% {
+        translate: 0 0em;
+        opacity: 1;
+        background: var(--c);
+      }
+      50.1% {
+        border-width: 2em;
+        background: black;
+      }
+      65% {
+        width: 4em;
+        height: 4em;
+        transform: translate(-50%, -50%);
+        border-width: 4px;
+      }
+      80%,
+      to {
+        width: 2em;
+        height: 2em;
+        translate: 0 0;
+        transform: translate(-3.5em, -50%);
+        border-width: 1em;
+        background: black;
+      }
+      80.1%,
+      to { background: var(--c); }
+      84.9% { opacity: 1; }
+      85%,
+      to { opacity: 0; }
+    }
+
+    .icon::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      border: 0.8em solid black;
+      box-sizing: border-box;
+      border-left-color: transparent !important;
+      border-bottom-color: transparent !important;
+      transform: translate(-50%, 2.5em) rotate(-45deg);
+      transform-origin: center;
+      animation: iconb 3s ease-in-out infinite;
+      z-index: -1;
+    }
+
+    @keyframes iconb {
+      20% {
+        transform: translate(-50%, 2.5em) rotate(-45deg);
+      }
+      50% {
+        transform: translate(-50%, -25%) rotate(-45deg);
+        border-color: black;
+      }
+      65%,
+      to {
+        transform: translateY(0) scale(1) scaleX(1.5) translate(-60%, -50%) rotate(45deg);
+        border-color: var(--c);
+      }
+      85%,
+      to {
+        transform: translate(-40%, -50%) scale(0) scaleX(1.5) translate(-75%, -50%) rotate(45deg);
+      }
+    }
+
+    .icon::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      background: black;
+      width: 1em;
+      height: 2em;
+      box-sizing: border-box;
+      border-left-color: transparent;
+      border-bottom-color: transparent;
+      animation: icona 3s ease-in-out infinite;
+    }
+
+    @keyframes icona {
+      20% { transform: translate(-50%, 2.5em); }
+      50% { transform: translate(-50%, 0.4em); }
+      65%,
+      to { transform: translate(-50%, 2.5em); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar relative sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-5 sm:px-8 h-[72px] flex items-center justify-between">
+
+      <!-- Logo -->
+      <a href="#" class="relative z-10">
+        <div class="logo-text text-[1.7rem] font-extrabold tracking-tight relative">
+          Lumio<span>Clip</span>
+        </div>
+      </a>
+
+      <!-- Desktop Links -->
+      <ul class="hidden md:flex items-center gap-8 relative z-10">
+        <li>
+          <a href="#" class="text-white/90 hover:text-white font-medium text-[0.95rem] transition relative group">
+            Home
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-300 rounded-full transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="text-white/90 hover:text-white font-medium text-[0.95rem] transition relative group">
+            Features
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-300 rounded-full transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="text-white/90 hover:text-white font-medium text-[0.95rem] transition relative group">
+            Pricing
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-300 rounded-full transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </li>
+        <li>
+          <a href="#" class="text-white/90 hover:text-white font-medium text-[0.95rem] transition relative group">
+            About
+            <span class="absolute -bottom-1 left-0 w-0 h-0.5 bg-yellow-300 rounded-full transition-all duration-300 group-hover:w-full"></span>
+          </a>
+        </li>
+      </ul>
+
+      <!-- Hamburger -->
+      <button id="hamburger" class="hamburger md:hidden relative z-10" aria-label="Toggle menu">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="mobile-menu md:hidden bg-gradient-to-b from-[#0284c7] to-[#0369a1]">
+      <ul class="flex flex-col px-6 py-5 gap-1">
+        <li><a href="#" class="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-xl font-medium transition">Home</a></li>
+        <li><a href="#" class="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-xl font-medium transition">Features</a></li>
+        <li><a href="#" class="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-xl font-medium transition">Pricing</a></li>
+        <li><a href="#" class="block py-3 px-4 text-white/90 hover:text-white hover:bg-white/10 rounded-xl font-medium transition">About</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- ===== URL INPUT + DOWNLOAD SECTION ===== -->
+  <section class="w-full py-16 sm:py-20 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+
+      <!-- Heading -->
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-800 mb-3 tracking-tight">
+        PASTE YOUR FACEBOOK URL HERE
+      </h1>
+      <p class="text-slate-500 mb-10 text-base sm:text-lg">
+        Fast, free, and easy Facebook video downloader 
+      </p>
+
+      <!-- Input + Button Container -->
+      <div class="flex flex-col sm:flex-row items-center gap-3 bg-white rounded-2xl shadow-xl shadow-sky-100/80 border border-slate-200 p-3 sm:p-2.5 transition-all duration-300 hover:shadow-2xl hover:shadow-sky-100">
+        
+        <!-- URL Input -->
+        <div class="relative flex-1 w-full">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+            </svg>
+          </div>
+          <input 
+            id="urlInput"
+            type="url" 
+            placeholder="Paste your video URL here..." 
+            class="url-input w-full h-12 sm:h-14 pl-12 pr-4 text-slate-700 placeholder-slate-400 bg-transparent border-0 focus:outline-none focus:ring-0 text-[15px] sm:text-base rounded-xl"
+          >
+        </div>
+
+        <!-- DOWNLOAD BUTTON -->
+        <button id="downloadBtn" class="cssbuttons-io-button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="20"
+            height="20"
+          >
+            <path fill="none" d="M0 0h24v24H0z"></path>
+            <path
+              fill="currentColor"
+              d="M1 14.5a6.496 6.496 0 0 1 3.064-5.519 8.001 8.001 0 0 1 15.872 0 6.5 6.5 0 0 1-2.936 12L7 21c-3.356-.274-6-3.078-6-6.5zm15.848 4.487a4.5 4.5 0 0 0 2.03-8.309l-.807-.503-.12-.942a6.001 6.001 0 0 0-11.903 0l-.12.942-.805.503a4.5 4.5 0 0 0 2.029 8.309l.173.013h9.35l.173-.013zM13 12h3l-4 5-4-5h3V8h2v4z"
+            ></path>
+          </svg>
+          <span>Download</span>
+        </button>
+      </div>
+
+      <!-- ===== LOADER (appears after clicking Download) ===== -->
+      <div id="loaderWrapper" class="loader-wrapper">
+        <div class="loader">
+          <div class="ph1">
+            <div class="record"></div>
+            <div class="record-text">REC</div>
+          </div>
+          <div class="ph2">
+            <div class="laptop-b"></div>
+            <svg
+              class="laptop-t"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 42 30"
+            >
+              <path
+                d="M21 1H5C2.78 1 1 2.78 1 5V25a4 4 90 004 4H37a4 4 90 004-4V5c0-2.22-1.8-4-4-4H21"
+                pathLength="100"
+                stroke-width="2"
+                stroke="currentColor"
+                fill="none"
+              ></path>
+            </svg>
+          </div>
+          <div class="icon"></div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+  const hamburger = document.getElementById('hamburger');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const urlInput = document.getElementById('urlInput');
+  const loaderWrapper = document.getElementById('loaderWrapper');
+
+  // Palitan lang ito kung iba ang IP o port ng Python server mo
+  const API_BASE = "http://100.91.203.78:5000";
+
+  // Hamburger menu
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+
+  // Download button
+  downloadBtn.addEventListener('click', async () => {
+    const url = urlInput.value.trim();
+
+    if (!url) {
+      urlInput.focus();
+      return;
+    }
+
+    loaderWrapper.classList.add('show');
+    downloadBtn.disabled = true;
+
+    try {
+      const response = await fetch(`${API_BASE}/api/download`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ url: url })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || data.error) {
+        alert(data.error || "May error sa download");
+        return;
+      }
+
+      // Simulan ang download
+      const a = document.createElement("a");
+      a.href = `${API_BASE}${data.download_url}`;
+      a.download = data.filename || "tiktok_video.mp4";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+
+    } catch (err) {
+      console.error(err);
+      alert("Hindi makakonekta sa server. Siguraduhing tumatakbo ang Python sa Termux.");
+    } finally {
+      setTimeout(() => {
+        loaderWrapper.classList.remove('show');
+        downloadBtn.disabled = false;
+      }, 1500);
+    }
+  });
+</script>
